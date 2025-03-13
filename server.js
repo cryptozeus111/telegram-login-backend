@@ -1,11 +1,10 @@
 const express = require('express');
 const { Telegraf } = require('telegraf');
 const crypto = require('crypto');
-const axios = require('axios');
 const cors = require('cors');
 require('dotenv').config();
 
-const BOT_TOKEN = process.env.BOT_TOKEN || '';
+const BOT_TOKEN = process.env.BOT_TOKEN || 'YOUR_BOT_TOKEN';
 const PORT = process.env.PORT || 3000;
 
 const app = express();
@@ -16,6 +15,10 @@ const bot = new Telegraf(BOT_TOKEN);
 
 bot.start((ctx) => {
   ctx.reply('Welcome to the Mini App! Use the login widget to authenticate.');
+});
+
+bot.catch((err, ctx) => {
+  console.error('Bot error:', err);
 });
 
 const launchBot = async () => {
@@ -46,20 +49,10 @@ function validateTelegramData(data, botToken) {
   return computedHash === data.hash;
 }
 
-app.post('/auth', (req, res) => {
-  const data = req.body;
-
-  if (validateTelegramData(data, BOT_TOKEN)) {
-    console.log('User authenticated:', data);
-    res.status(200).json({ message: 'Login successful!', user: data });
-  } else {
-    console.log('Invalid login attempt:', data);
-    res.status(403).json({ message: 'Invalid login!' });
-  }
-});
-
 app.post('/validate-initdata', (req, res) => {
   const initData = req.body.initData;
+  console.log('Received initData:', initData);
+
   const params = new URLSearchParams(initData);
   const hash = params.get('hash');
   const data = {};
